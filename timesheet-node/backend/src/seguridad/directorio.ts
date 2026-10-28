@@ -42,6 +42,12 @@ function esErrorDeConexion(error: unknown): boolean {
   return !(error instanceof InvalidCredentialsError) && !(error instanceof ReglaNegocioError);
 }
 
+/** Nombre para el bind: se deja tal cual si ya trae "@" o "\" (usuario@dominio, DOMINIO\usuario); si no, usuario@dominio. */
+function nombreDeBind(login: string): string {
+  const nombre = login.trim();
+  return nombre.includes('@') || nombre.includes('\\') ? nombre : `${nombre}@${config.ad.dominio}`;
+}
+
 /** Busca la cuenta por sAMAccountName usando la cuenta de servicio. undefined si no existe. */
 async function buscarEntrada(login: string): Promise<UsuarioDirectorio | undefined> {
   if (!config.ad.bindUsuario) {
@@ -80,7 +86,7 @@ async function buscarEntrada(login: string): Promise<UsuarioDirectorio | undefin
 /**
  * Valida usuario y contraseña de red contra AD. Lanza DirectorioNoDisponibleError si no se puede contactar al
  * controlador de dominio. Con cuenta de servicio configurada, busca el DN del usuario y hace bind con él;
- * si no, hace bind con usuario@dominio.
+ * si no, hace bind directo con usuario@dominio (o el nombre tal cual si ya trae "@" o "\"), como ApiCore.
  */
 export async function validarCredenciales(login: string, password: string): Promise<boolean> {
   // Con contraseña vacía AD puede aceptar un bind anónimo: se rechaza antes.
@@ -88,7 +94,7 @@ export async function validarCredenciales(login: string, password: string): Prom
   if (config.ad.modo === 'simulado') return true;
 
   try {
-    let dn = `${login}@${config.ad.dominio}`;
+    let dn = nombreDeBind(login);
     if (config.ad.bindUsuario) {
       const cuenta = await buscarEntrada(login);
       if (!cuenta || !cuenta.habilitado) return false;
