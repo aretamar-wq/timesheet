@@ -1,0 +1,240 @@
+/* ---------- Paleta Cocos (tomada del logo) ----------
+   Azul marino #002C65: textos de marca. Azul #0062E1: acciones, links, foco, sección activa.
+   Se reemplaza el azul primario de Bootstrap vía sus variables CSS. */
+:root {
+    --app-marino: #002C65;
+    --app-azul: #0062E1;
+    --app-azul-hover: #0052BD;
+    --app-azul-activo: #004AAA;
+    --app-azul-rgb: 0, 98, 225;
+
+    --bs-primary: var(--app-azul);
+    --bs-primary-rgb: var(--app-azul-rgb);
+    --bs-link-color: var(--app-azul);
+    --bs-link-color-rgb: var(--app-azul-rgb);
+    --bs-link-hover-color: var(--app-azul-hover);
+    --bs-link-hover-color-rgb: 0, 82, 189;
+}
+
+body {
+    background-color: #f5f6f8;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--app-azul);
+    --bs-btn-border-color: var(--app-azul);
+    --bs-btn-hover-bg: var(--app-azul-hover);
+    --bs-btn-hover-border-color: var(--app-azul-hover);
+    --bs-btn-active-bg: var(--app-azul-activo);
+    --bs-btn-active-border-color: var(--app-azul-activo);
+    --bs-btn-disabled-bg: var(--app-azul);
+    --bs-btn-disabled-border-color: var(--app-azul);
+    --bs-btn-focus-shadow-rgb: var(--app-azul-rgb);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--app-azul);
+    --bs-btn-border-color: var(--app-azul);
+    --bs-btn-hover-bg: var(--app-azul);
+    --bs-btn-hover-border-color: var(--app-azul);
+    --bs-btn-active-bg: var(--app-azul-hover);
+    --bs-btn-active-border-color: var(--app-azul-hover);
+    --bs-btn-disabled-color: var(--app-azul);
+    --bs-btn-disabled-border-color: var(--app-azul);
+    --bs-btn-focus-shadow-rgb: var(--app-azul-rgb);
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: #80b1f0;
+    box-shadow: 0 0 0 .25rem rgba(var(--app-azul-rgb), .25);
+}
+
+.form-check-input:checked {
+    background-color: var(--app-azul);
+    border-color: var(--app-azul);
+}
+
+/* ---------- Barra superior (clara, con la marca) ---------- */
+.barra-app {
+    background-color: #fff;
+    border-bottom: 1px solid #e2e6ee;
+    box-shadow: 0 1px 3px rgba(0, 44, 101, .06);
+}
+
+.barra-app .navbar-brand {
+    color: var(--app-marino);
+    font-weight: 600;
+}
+
+.barra-app .nav-link {
+    color: #3d4a61;
+}
+
+.barra-app .nav-link:hover,
+.barra-app .nav-link:focus {
+    color: var(--app-azul);
+}
+
+.barra-app .nav-link.active {
+    color: var(--app-azul);
+    font-weight: 600;
+}
+
+@media (min-width: 992px) {
+    /* Subrayado de la sección activa, pegado al borde inferior de la barra. */
+    .barra-app .nav-link.active {
+        box-shadow: inset 0 -3px 0 var(--app-azul);
+    }
+}
+
+.barra-app .dropdown-item:active {
+    background-color: var(--app-azul);
+}
+
+/* Login: tarjeta angosta y centrada. */
+.tarjeta-login {
+    max-width: 24rem;
+    margin: 3rem auto 0;
+}
+
+.titulo-marca {
+    color: var(--app-marino);
+    font-weight: 600;
+}
+
+/* Logo de la aplicación junto al nombre (PNG con fondo transparente). */
+.logo-app {
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+/* Contenedor que se ajusta al ancho de su contenido (p. ej. una tabla angosta), sin pasar el ancho de pantalla:
+   los elementos alineados a la derecha con ms-auto quedan pegados al borde del contenido, no al de la pantalla. */
+.contenido-ajustado {
+    width: fit-content;
+    max-width: 100%;
+}
+
+/* ---------- ABM ---------- */
+
+/* Barra de filtros de los listados: anchos fijos (no porcentajes de la pantalla), acciones pegadas a los campos. */
+.filtros-abm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.filtros-abm .filtro-texto { width: 16rem; }
+.filtros-abm .filtro-combo { width: 13rem; }
+.filtros-abm .filtro-combo-ancho { width: 18rem; }
+.filtros-abm .filtro-estado { width: 10rem; }
+.filtros-abm .filtro-fecha { width: 9.5rem; }
+
+.filtros-abm > div {
+    max-width: 100%;
+}
+
+.filtros-abm .filtro-acciones {
+    display: flex;
+    gap: .25rem;
+}
+
+/* Links junto a los campos (ej. "mes actual"), alineados con el texto de los inputs */
+.filtros-abm .filtro-periodo {
+    padding-bottom: .35rem;
+    white-space: nowrap;
+}
+.formulario-abm {
+    max-width: 40rem;
+}
+
+.tabla-abm td,
+.tabla-abm th {
+    padding-left: .75rem;
+    padding-right: .75rem;
+}
+
+/* ---------- Grilla de carga de horas ---------- */
+/* La tabla no ocupa todo el ancho: columnas de días/total fijas y angostas; la primera se ajusta al contenido. */
+.grilla-horas {
+    width: auto;
+}
+
+.grilla-horas .col-fila {
+    min-width: 20rem;
+}
+
+.grilla-horas .col-fila > div {
+    max-width: 32rem;   /* nombres largos hacen salto de línea en vez de ensanchar la tabla */
+}
+
+.grilla-horas .col-dia,
+.grilla-horas .col-total,
+.grilla-horas .total-dia {
+    width: 5rem;
+    min-width: 5rem;
+}
+
+.grilla-horas .col-acciones {
+    width: 2rem;
+    min-width: 2rem;
+}
+
+.grilla-horas .fin-de-semana {
+    --bs-table-bg: #eef0f3;
+    background-color: #eef0f3;
+}
+
+.grilla-horas thead th.hoy {
+    box-shadow: inset 0 -3px 0 var(--app-azul);
+}
+
+.grilla-horas .excedido {
+    color: #dc3545;
+}
+
+.fila-baja th {
+    color: #6c757d;
+}
+
+.celda-horas {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: center;
+    padding: .45rem .25rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.celda-horas:focus {
+    outline: 2px solid var(--app-azul);
+    outline-offset: -2px;
+    background-color: #fff;
+}
+
+.celda-horas:disabled {
+    color: #6c757d;
+}
+
+.celda-horas.guardando {
+    background-color: #fff3cd;
+}
+
+.celda-horas.guardado {
+    animation: celda-guardada 1.2s ease-out;
+}
+
+@keyframes celda-guardada {
+    from { background-color: #d1e7dd; }
+    to { background-color: transparent; }
+}
+
+.celda-horas.con-error {
+    outline: 2px solid #dc3545;
+    outline-offset: -2px;
+    background-color: #f8d7da;
+}

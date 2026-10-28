@@ -1,0 +1,36 @@
+# Cocos Bank Timesheet - backend Node como servicio.
+# Copiar a /etc/systemd/system/timesheet-api.service y ejecutar:
+#   systemctl daemon-reload && systemctl enable --now timesheet-api
+# Logs: journalctl -u timesheet-api -f
+
+[Unit]
+Description=Cocos Bank Timesheet - API
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=timesheet
+Group=timesheet
+# dotenv lee backend/.env desde este directorio.
+WorkingDirectory=/opt/timesheet/backend
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+
+# Si el certificado del controlador de dominio (LDAPS/STARTTLS) lo emite una CA interna que el servidor no
+# reconoce, agregar la CA (formato PEM) y descomentar:
+# Environment=NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-interna.pem
+
+# Endurecimiento: el servicio solo lee sus archivos y habla por red con MariaDB y AD.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
