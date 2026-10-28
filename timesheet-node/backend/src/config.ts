@@ -39,6 +39,13 @@ if (produccion && secreto.length < 32) {
   throw new Error('SESION_SECRETO debe tener al menos 32 caracteres.');
 }
 
+// Conexión al Domain Controller: servidor, puerto y SSL por separado (igual que ApiCore).
+// AD_URL, si está, tiene prioridad (compatibilidad con instalaciones anteriores).
+const adServidor = texto('AD_SERVIDOR', dominio);
+const adUsaSsl = booleano('AD_USA_SSL', false);
+const adPuerto = entero('AD_PUERTO', adUsaSsl ? 636 : 389);
+const adUrl = texto('AD_URL', `${adUsaSsl ? 'ldaps' : 'ldap'}://${adServidor}:${adPuerto}`);
+
 export const config = {
   produccion,
   host: texto('HOST', '127.0.0.1'),
@@ -59,7 +66,7 @@ export const config = {
   ad: {
     modo: modoAd as 'real' | 'simulado',
     dominio,
-    url: texto('AD_URL', `ldap://${dominio}:389`),
+    url: adUrl,
     startTls: booleano('AD_STARTTLS', true),
     tlsVerificar: booleano('AD_TLS_VERIFICAR', true),
     baseDn: texto('AD_BASE_DN', baseDnDe(dominio)),
