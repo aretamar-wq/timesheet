@@ -7,7 +7,7 @@ import { consultarReporte, opcionesFiltro, type FiltroReporte } from '../servici
 import { enteroOpcional, enterosSeparadosPorComa, textoOpcional } from './parametros.js';
 
 /**
- * Reporte de horas: filtros por fecha, usuarios (uno o varios), proyecto, categoría y tarea/GLPI; resultado con total al pie y
+ * Reporte de horas: filtros por fecha, usuarios y grupos (uno o varios), proyecto, categoría y tarea/GLPI; resultado con total al pie y
  * exportación a Excel (.xlsx) y TXT. Todos los endpoints son GET con los mismos parámetros de filtro.
  */
 export const rutasReportes = Router();
@@ -28,6 +28,7 @@ function armarFiltro(req: Request): FiltroReporte {
     desde: parsearFecha(req.query.desde) ?? mes.desde,
     hasta: parsearFecha(req.query.hasta) ?? mes.hasta,
     usuarioIds: enterosSeparadosPorComa(req.query.usuarioIds),
+    grupoIds: enterosSeparadosPorComa(req.query.grupoIds),
     proyectoId: enteroOpcional(req.query.proyectoId),
     categoriaId: enteroOpcional(req.query.categoriaId),
     tarea: textoOpcional(req.query.tarea) ?? '',
@@ -44,6 +45,10 @@ async function describirFiltro(filtro: FiltroReporte): Promise<string> {
   if (filtro.usuarioIds.length > 0) {
     const nombres = filtro.usuarioIds.map((id) => textoDe(opciones.usuarios, id)).join(', ');
     partes.push(`${filtro.usuarioIds.length === 1 ? 'Usuario' : 'Usuarios'}: ${nombres}`);
+  }
+  if (filtro.grupoIds.length > 0) {
+    const nombres = filtro.grupoIds.map((id) => textoDe(opciones.grupos, id)).join(', ');
+    partes.push(`${filtro.grupoIds.length === 1 ? 'Grupo' : 'Grupos'}: ${nombres}`);
   }
   if (filtro.proyectoId !== undefined) partes.push(`Proyecto: ${textoDe(opciones.proyectos, filtro.proyectoId)}`);
   if (filtro.categoriaId !== undefined) partes.push(`Categoría: ${textoDe(opciones.categorias, filtro.categoriaId)}`);
@@ -67,7 +72,7 @@ rutasReportes.get('/opciones', async (_req, res) => {
   });
 });
 
-// GET /api/reportes?desde=2026-09-01&hasta=2026-09-30&usuarioIds=3,7&proyectoId=&categoriaId=&tarea=
+// GET /api/reportes?desde=2026-09-01&hasta=2026-09-30&usuarioIds=3,7&grupoIds=1,2&proyectoId=&categoriaId=&tarea=
 rutasReportes.get('/', async (req, res) => {
   const filtro = armarFiltro(req);
   res.json({ filtro, ...(await consultarReporte(filtro, MAXIMO_FILAS_PANTALLA)) });

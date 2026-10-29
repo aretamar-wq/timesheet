@@ -7,6 +7,8 @@ import { CategoriaFormulario } from './paginas/categorias/CategoriaFormulario';
 import { CategoriasListado } from './paginas/categorias/CategoriasListado';
 import { FamiliaFormulario } from './paginas/familias/FamiliaFormulario';
 import { FamiliasListado } from './paginas/familias/FamiliasListado';
+import { GrupoFormulario } from './paginas/grupos/GrupoFormulario';
+import { GruposListado } from './paginas/grupos/GruposListado';
 import { Login } from './paginas/Login';
 import { PatenteFormulario } from './paginas/patentes/PatenteFormulario';
 import { PatentesListado } from './paginas/patentes/PatentesListado';
@@ -63,6 +65,10 @@ export function App() {
         <Route path="familias" element={con(Patente.ABM_FAMILIAS, <FamiliasListado />)} />
         <Route path="familias/nueva" element={con(Patente.ABM_FAMILIAS, <FamiliaFormulario />)} />
         <Route path="familias/:id" element={con(Patente.ABM_FAMILIAS, <FamiliaFormulario />)} />
+
+        <Route path="grupos" element={con(Patente.ABM_GRUPOS, <GruposListado />)} />
+        <Route path="grupos/nuevo" element={con(Patente.ABM_GRUPOS, <GrupoFormulario />)} />
+        <Route path="grupos/:id" element={con(Patente.ABM_GRUPOS, <GrupoFormulario />)} />
 
         <Route path="patentes" element={con(Patente.ABM_PATENTES, <PatentesListado />)} />
         <Route path="patentes/:id" element={con(Patente.ABM_PATENTES, <PatenteFormulario />)} />

@@ -71,7 +71,8 @@ FROM (SELECT 1 AS id, 'CARGA_HORAS' AS nombre, 'Carga de horas semanal' AS descr
       UNION ALL SELECT 5, 'ABM_USUARIOS',   'Administración de usuarios'
       UNION ALL SELECT 6, 'ABM_FAMILIAS',   'Administración de familias'
       UNION ALL SELECT 7, 'ABM_PATENTES',   'Administración de patentes'
-      UNION ALL SELECT 8, 'VER_REPORTES',   'Consulta y exportación de reportes') AS v
+      UNION ALL SELECT 8, 'VER_REPORTES',   'Consulta y exportación de reportes'
+      UNION ALL SELECT 9, 'ABM_GRUPOS',     'Administración de grupos de usuarios') AS v
 WHERE NOT EXISTS (SELECT 1 FROM Patentes p WHERE p.pat_id = v.id);
 
 /* Familia_Patente: Empleado -> CARGA_HORAS; Administrador -> todas */
@@ -82,7 +83,7 @@ WHERE NOT EXISTS (SELECT 1 FROM Familia_Patente WHERE fam_id = 1 AND pat_id = 1)
 INSERT INTO Familia_Patente (fam_id, pat_id)
 SELECT 2, p.pat_id
 FROM Patentes p
-WHERE p.pat_id BETWEEN 1 AND 8
+WHERE p.pat_id BETWEEN 1 AND 9
   AND NOT EXISTS (SELECT 1 FROM Familia_Patente fp WHERE fp.fam_id = 2 AND fp.pat_id = p.pat_id);
 
 /* Usuario administrador inicial */

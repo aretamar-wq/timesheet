@@ -80,6 +80,14 @@ Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a u
 
 **Usuarios** — ver campos de seguridad en la sección de modelo de negocio (`usu_login`, `usu_fam`, `usu_activo`).
 
+**Grupos** (script `database/04_grupos.sql`) — reúnen usuarios para agrupar personas y filtrar reportes; **no otorgan permisos** (eso lo hacen las Familias). Un usuario puede estar en varios grupos.
+
+- `gru_id` (PK)
+- `gru_nombre` — único (sin distinguir mayúsculas ni tildes)
+- `gru_activo` (bit) — baja lógica
+
+**Grupo\_Usuario** (relación muchos a muchos): `gru_id` (FK → Grupos.gru\_id), `usu_id` (FK → Usuarios.usu\_id).
+
 ## Datos semilla de seguridad
 
 **Familias** (2 registros iniciales)
@@ -87,7 +95,7 @@ Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a u
 - `Empleado`
 - `Administrador`
 
-**Patentes** (8 registros iniciales, desglosadas por función — permite crear familias intermedias a futuro sin cambiar estructura)
+**Patentes** (9 registros iniciales, desglosadas por función — permite crear familias intermedias a futuro sin cambiar estructura)
 
 - `CARGA_HORAS`
 - `ABM_PROYECTOS`
@@ -97,11 +105,12 @@ Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a u
 - `ABM_FAMILIAS`
 - `ABM_PATENTES`
 - `VER_REPORTES`
+- `ABM_GRUPOS`
 
 **Asignación Familia\_Patente**
 
 - `Empleado` → `CARGA_HORAS`
-- `Administrador` → las 8 patentes
+- `Administrador` → las 9 patentes
 
 ## Reglas de negocio
 
@@ -139,7 +148,8 @@ AD valida identidad; la aplicación es la única fuente de verdad sobre permisos
 
 ```
 timesheet-node/
-├─ database/    01_schema.sql, 02_seed.sql (idempotente), 03_usuario_app.sql (usuario MariaDB de la app)
+├─ database/    01_schema.sql, 02_seed.sql (idempotente), 03_usuario_app.sql (usuario MariaDB de la app),
+│               04_grupos.sql (grupos de usuarios; idempotente)
 ├─ backend/     src/config.ts (.env), db.ts, dominio/ (constantes, duracion, fechas), seguridad/ (AD, sesión,
 │               middleware), servicios/ (reglas de negocio), rutas/ (API), exportacion/ (Excel/TXT)
 ├─ frontend/    src/api/ (cliente fetch + tipos), sesion/, componentes/ (Layout, Abm, Mensajes, Estados),
@@ -205,6 +215,7 @@ Mismo comportamiento que la versión anterior. Pantalla, frontend y backend de c
   - **Tareas**: GLPI único por proyecto, también contra tareas dadas de baja. Una tarea con horas no puede cambiar de proyecto.
   - **Usuarios**: validación en AD con "Verificar en AD" (`/api/usuarios/buscar-ad`).
   - **Familias**.
+  - **Grupos** (`ABM_GRUPOS`): nombre + usuarios (checkboxes con buscador). Un usuario puede estar en varios grupos. Backend en `servicios/grupoService.ts`; `GET /api/grupos/usuarios` trae los usuarios para el formulario.
   - **Patentes**: solo consulta y edición de la descripción.
   - Protección contra quedarse afuera, en `servicios/administradores.ts`:
     - Nadie puede darse de baja ni cambiar su propio login.
@@ -212,7 +223,7 @@ Mismo comportamiento que la versión anterior. Pantalla, frontend y backend de c
     - Todo cambio en Familias se guarda con `guardarSinPerderAdministradores`: guarda en una transacción, verifica que quede al menos un administrador activo y, si no, revierte.
 - **Reportes** (`VER_REPORTES`):
   - Frontend: `paginas/Reportes.tsx`. Backend: `rutas/reportes.ts`, `servicios/reporteService.ts` y `exportacion/exportadorReporte.ts`.
-  - Filtros por fechas (por defecto el mes actual, con accesos rápidos a mes actual y mes anterior), usuarios (uno o varios, desplegable con casillas; viajan como `usuarioIds=3,7`), proyecto, categoría y "Tarea / GLPI".
+  - Filtros por fechas (por defecto el mes actual, con accesos rápidos a mes actual y mes anterior), usuarios (uno o varios, desplegable con casillas; viajan como `usuarioIds=3,7`), grupos (uno o varios, igual; `grupoIds=1,2`; trae los usuarios que integran alguno de los grupos y se combina con el filtro de usuarios: deben cumplir ambos), proyecto, categoría y "Tarea / GLPI".
   - Incluye registros dados de baja.
   - En pantalla muestra hasta 2000 filas. El total y la cantidad son siempre sobre todos los registros.
   - **Excel** (`exceljs`): encabezado, autofiltro, filas inmovilizadas, duración `[h]:mm` y total con `SUM`.

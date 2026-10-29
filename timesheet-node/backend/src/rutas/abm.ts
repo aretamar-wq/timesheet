@@ -4,6 +4,7 @@ import { NoEncontradoError } from '../errores.js';
 import { requierePatente, sesionDe } from '../seguridad/middleware.js';
 import * as categorias from '../servicios/categoriaService.js';
 import * as familias from '../servicios/familiaService.js';
+import * as grupos from '../servicios/grupoService.js';
 import * as patentes from '../servicios/patenteService.js';
 import * as proyectos from '../servicios/proyectoService.js';
 import * as tareas from '../servicios/tareaService.js';
@@ -177,6 +178,33 @@ rutasFamilias.put('/:id', async (req, res) => {
 });
 rutasFamilias.put('/:id/estado', async (req, res) => {
   await familias.cambiarEstado(idDeRuta(req), booleano(cuerpo(req).activo), sesionDe(req).usuarioId);
+  res.status(204).end();
+});
+
+/* ---------- Grupos (agrupan usuarios; se usan para filtrar reportes) ---------- */
+export const rutasGrupos = Router();
+rutasGrupos.use(requierePatente(Patente.ABM_GRUPOS));
+
+rutasGrupos.get('/', async (req, res) => {
+  res.json(await grupos.listar(textoOpcional(req.query.texto), parsearEstado(req.query.estado)));
+});
+// Usuarios para los checkboxes del formulario: los activos, más los que ya integran el grupo (?incluirGrupoId=).
+rutasGrupos.get('/usuarios', async (req, res) => {
+  res.json(await grupos.usuariosDisponibles(enteroOpcional(req.query.incluirGrupoId)));
+});
+rutasGrupos.get('/:id', async (req, res) => {
+  res.json(encontrado(await grupos.obtener(idDeRuta(req))));
+});
+rutasGrupos.post('/', async (req, res) => {
+  const body = cuerpo(req);
+  res.status(201).json({ id: await grupos.guardar(0, body.nombre, listaDeEnteros(body.usuarioIds)) });
+});
+rutasGrupos.put('/:id', async (req, res) => {
+  const body = cuerpo(req);
+  res.json({ id: await grupos.guardar(idDeRuta(req), body.nombre, listaDeEnteros(body.usuarioIds)) });
+});
+rutasGrupos.put('/:id/estado', async (req, res) => {
+  await grupos.cambiarEstado(idDeRuta(req), booleano(cuerpo(req).activo));
   res.status(204).end();
 });
 

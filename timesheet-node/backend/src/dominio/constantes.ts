@@ -7,6 +7,7 @@ export const Patente = {
   ABM_USUARIOS: 'ABM_USUARIOS',
   ABM_FAMILIAS: 'ABM_FAMILIAS',
   ABM_PATENTES: 'ABM_PATENTES',
+  ABM_GRUPOS: 'ABM_GRUPOS',
   VER_REPORTES: 'VER_REPORTES',
 } as const;
 export type PatenteCodigo = (typeof Patente)[keyof typeof Patente];

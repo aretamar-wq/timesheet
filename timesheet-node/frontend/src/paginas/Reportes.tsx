@@ -8,13 +8,16 @@ import { useTitulo } from '../hooks/useTitulo';
 import { aDiaMesAnio, aHorasMinutos } from '../utils/formato';
 
 /**
- * Desplegable con casillas para elegir uno o varios usuarios. El valor son los ids separados por coma
- * (así entra en los filtros de la URL); vacío = todos.
+ * Desplegable con casillas para elegir uno o varios elementos (usuarios, grupos). El valor son los ids separados
+ * por coma (así entra en los filtros de la URL); vacío = todos. "unidad" y "unidades" arman el resumen del botón.
  */
-function SelectorUsuarios({ opciones, valor, alCambiar }: {
+function SelectorMultiple({ id, opciones, valor, alCambiar, unidad, unidades }: {
+  id: string;
   opciones: OpcionFiltro[];
   valor: string;
   alCambiar: (valor: string) => void;
+  unidad: string;
+  unidades: string;
 }) {
   const elegidos = valor ? valor.split(',') : [];
   const alternar = (id: string) =>
@@ -27,13 +30,13 @@ function SelectorUsuarios({ opciones, valor, alCambiar }: {
 
   const nombres = opciones.filter((o) => elegidos.includes(String(o.id))).map((o) => o.texto);
   const resumen =
-    elegidos.length === 0 ? 'Todos' : elegidos.length === 1 ? (nombres[0] ?? '1 usuario') : `${elegidos.length} usuarios`;
+    elegidos.length === 0 ? 'Todos' : elegidos.length === 1 ? (nombres[0] ?? `1 ${unidad}`) : `${elegidos.length} ${unidades}`;
 
   return (
     <div className="dropdown">
       <button
         type="button"
-        id="usuarioIds"
+        id={id}
         className="form-select form-select-sm text-start text-truncate"
         data-bs-toggle="dropdown"
         data-bs-auto-close="outside"
@@ -65,12 +68,12 @@ function SelectorUsuarios({ opciones, valor, alCambiar }: {
 }
 
 /**
- * Reporte de horas: filtros en la URL (fechas, usuarios, proyecto, categoría, tarea/GLPI), resultado con total al pie
+ * Reporte de horas: filtros en la URL (fechas, usuarios, grupos, proyecto, categoría, tarea/GLPI), resultado con total al pie
  * y exportación a Excel y TXT. Sin fechas en la URL, el backend usa el mes actual.
  */
 export function Reportes() {
   useTitulo('Reportes');
-  const filtros = useFiltrosUrl({ desde: '', hasta: '', usuarioIds: '', proyectoId: '', categoriaId: '', tarea: '' });
+  const filtros = useFiltrosUrl({ desde: '', hasta: '', usuarioIds: '', grupoIds: '', proyectoId: '', categoriaId: '', tarea: '' });
   const { aplicados, borrador, cambiar } = filtros;
 
   const opciones = useDatos(() => api.get<OpcionesReporte>('/reportes/opciones'), []);
@@ -129,10 +132,24 @@ export function Reportes() {
         <div className="filtros-abm mb-0">
           <div className="filtro-combo">
             <label htmlFor="usuarioIds" className="form-label small mb-1">Usuarios</label>
-            <SelectorUsuarios
+            <SelectorMultiple
+              id="usuarioIds"
               opciones={opciones.datos?.usuarios ?? []}
               valor={borrador.usuarioIds}
               alCambiar={(valor) => cambiar('usuarioIds', valor)}
+              unidad="usuario"
+              unidades="usuarios"
+            />
+          </div>
+          <div className="filtro-combo">
+            <label htmlFor="grupoIds" className="form-label small mb-1">Grupos</label>
+            <SelectorMultiple
+              id="grupoIds"
+              opciones={opciones.datos?.grupos ?? []}
+              valor={borrador.grupoIds}
+              alCambiar={(valor) => cambiar('grupoIds', valor)}
+              unidad="grupo"
+              unidades="grupos"
             />
           </div>
           <div className="filtro-combo filtro-combo-ancho">

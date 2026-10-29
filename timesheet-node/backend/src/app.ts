@@ -2,7 +2,15 @@ import cookieParser from 'cookie-parser';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { NoEncontradoError, ReglaNegocioError } from './errores.js';
 import { requiereHeaderAjax, requiereSesion } from './seguridad/middleware.js';
-import { rutasCategorias, rutasFamilias, rutasPatentes, rutasProyectos, rutasTareas, rutasUsuarios } from './rutas/abm.js';
+import {
+  rutasCategorias,
+  rutasFamilias,
+  rutasGrupos,
+  rutasPatentes,
+  rutasProyectos,
+  rutasTareas,
+  rutasUsuarios,
+} from './rutas/abm.js';
 import { rutasAuth } from './rutas/auth.js';
 import { rutasCargaHoras } from './rutas/cargaHoras.js';
 import { rutasReportes } from './rutas/reportes.js';
@@ -33,6 +41,7 @@ export function crearApp(): express.Express {
   api.use('/tareas', rutasTareas);
   api.use('/usuarios', rutasUsuarios);
   api.use('/familias', rutasFamilias);
+  api.use('/grupos', rutasGrupos);
   api.use('/patentes', rutasPatentes);
   api.use('/reportes', rutasReportes);
 

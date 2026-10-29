@@ -58,6 +58,7 @@ cd /opt/timesheet/database
 sudo mariadb < 01_schema.sql
 sudo mariadb < 02_seed.sql
 sudo mariadb < 03_usuario_app.sql
+sudo mariadb < 04_grupos.sql
 ```
 
 ## 4. Backend

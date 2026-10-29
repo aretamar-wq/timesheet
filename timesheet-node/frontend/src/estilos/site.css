@@ -248,3 +248,9 @@ body {
     outline-offset: -2px;
     background-color: #f8d7da;
 }
+
+/* Lista de casillas larga (ej. usuarios de un grupo): alto limitado, con scroll */
+.lista-seleccion {
+    max-height: 22rem;
+    overflow-y: auto;
+}

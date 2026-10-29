@@ -13,6 +13,8 @@ export interface FiltroReporte {
   hasta: string;
   /** Vacío = todos los usuarios. */
   usuarioIds: number[];
+  /** Vacío = sin filtro por grupo. Con grupos, solo los usuarios que integran alguno de ellos (se combina con usuarioIds). */
+  grupoIds: number[];
   proyectoId?: number;
   categoriaId?: number;
   /** Si es un número, busca ese GLPI exacto (o el texto en la descripción); si no, busca en la descripción. */
@@ -54,6 +56,12 @@ export async function consultarReporte(filtro: FiltroReporte, maximoFilas?: numb
   if (filtro.usuarioIds.length > 0) {
     condiciones.push(`t.tie_usu IN (${filtro.usuarioIds.map(() => '?').join(', ')})`);
     parametros.push(...filtro.usuarioIds);
+  }
+  if (filtro.grupoIds.length > 0) {
+    condiciones.push(
+      `t.tie_usu IN (SELECT gu.usu_id FROM Grupo_Usuario gu WHERE gu.gru_id IN (${filtro.grupoIds.map(() => '?').join(', ')}))`,
+    );
+    parametros.push(...filtro.grupoIds);
   }
   if (filtro.proyectoId !== undefined) {
     condiciones.push('t.tie_pro = ?');
@@ -115,14 +123,20 @@ export interface OpcionFiltro {
 /** Desplegables del filtro. Incluyen registros dados de baja: sus horas siguen apareciendo en los reportes. */
 export async function opcionesFiltro(): Promise<{
   usuarios: OpcionFiltro[];
+  grupos: OpcionFiltro[];
   proyectos: OpcionFiltro[];
   categorias: OpcionFiltro[];
 }> {
-  const [usuarios, proyectos, categorias] = await Promise.all([
+  const [usuarios, grupos, proyectos, categorias] = await Promise.all([
     consultar<OpcionFiltro>(
       pool,
       `SELECT usu_id AS id, CONCAT(usu_nombre, IF(usu_activo, '', ' (dado de baja)')) AS texto
          FROM Usuarios ORDER BY usu_nombre`,
+    ),
+    consultar<OpcionFiltro>(
+      pool,
+      `SELECT gru_id AS id, CONCAT(gru_nombre, IF(gru_activo, '', ' (dado de baja)')) AS texto
+         FROM Grupos ORDER BY gru_nombre`,
     ),
     consultar<OpcionFiltro>(
       pool,
@@ -135,5 +149,5 @@ export async function opcionesFiltro(): Promise<{
          FROM Categorias ORDER BY cat_nombre`,
     ),
   ]);
-  return { usuarios, proyectos, categorias };
+  return { usuarios, grupos, proyectos, categorias };
 }

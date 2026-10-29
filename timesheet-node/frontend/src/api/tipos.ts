@@ -8,6 +8,7 @@ export const Patente = {
   ABM_USUARIOS: 'ABM_USUARIOS',
   ABM_FAMILIAS: 'ABM_FAMILIAS',
   ABM_PATENTES: 'ABM_PATENTES',
+  ABM_GRUPOS: 'ABM_GRUPOS',
   VER_REPORTES: 'VER_REPORTES',
 } as const;
 export type PatenteCodigo = (typeof Patente)[keyof typeof Patente];
@@ -152,6 +153,27 @@ export interface FamiliaListado extends Familia {
   usuariosActivos: number;
 }
 
+export interface Grupo {
+  id: number;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface GrupoDetalle extends Grupo {
+  usuarioIds: number[];
+}
+
+export interface GrupoListado extends Grupo {
+  usuariosActivos: number;
+}
+
+export interface UsuarioDeGrupo {
+  id: number;
+  login: string;
+  nombre: string;
+  activo: boolean;
+}
+
 export interface PatenteItem {
   id: number;
   nombre: string;
@@ -182,6 +204,7 @@ export interface Periodo {
 
 export interface OpcionesReporte {
   usuarios: OpcionFiltro[];
+  grupos: OpcionFiltro[];
   proyectos: OpcionFiltro[];
   categorias: OpcionFiltro[];
   mesActual: Periodo;
@@ -193,6 +216,7 @@ export interface FiltroReporte {
   desde: string;
   hasta: string;
   usuarioIds: number[];
+  grupoIds: number[];
   proyectoId?: number;
   categoriaId?: number;
   tarea: string;
