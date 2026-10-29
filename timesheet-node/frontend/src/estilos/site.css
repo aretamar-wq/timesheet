@@ -143,6 +143,16 @@ body {
     gap: .25rem;
 }
 
+/* Desplegable con casillas (ej. usuarios en Reportes): ancho como mínimo el del campo, con scroll si es largo. */
+.filtros-abm .selector-multiple {
+    min-width: 100%;
+    max-height: 20rem;
+    overflow-y: auto;
+}
+.filtros-abm .selector-multiple .dropdown-item {
+    cursor: pointer;
+}
+
 /* Links junto a los campos (ej. "mes actual"), alineados con el texto de los inputs */
 .filtros-abm .filtro-periodo {
     padding-bottom: .35rem;

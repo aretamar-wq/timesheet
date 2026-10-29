@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { api, queryString } from '../api/cliente';
-import type { OpcionesReporte, ResultadoReporte } from '../api/tipos';
+import type { OpcionesReporte, OpcionFiltro, ResultadoReporte } from '../api/tipos';
 import { useFiltrosUrl } from '../componentes/Abm';
 import { Cargando, ErrorCarga } from '../componentes/Estados';
 import { useDatos } from '../hooks/useDatos';
@@ -8,12 +8,69 @@ import { useTitulo } from '../hooks/useTitulo';
 import { aDiaMesAnio, aHorasMinutos } from '../utils/formato';
 
 /**
- * Reporte de horas: filtros en la URL (fechas, usuario, proyecto, categoría, tarea/GLPI), resultado con total al pie
+ * Desplegable con casillas para elegir uno o varios usuarios. El valor son los ids separados por coma
+ * (así entra en los filtros de la URL); vacío = todos.
+ */
+function SelectorUsuarios({ opciones, valor, alCambiar }: {
+  opciones: OpcionFiltro[];
+  valor: string;
+  alCambiar: (valor: string) => void;
+}) {
+  const elegidos = valor ? valor.split(',') : [];
+  const alternar = (id: string) =>
+    alCambiar(
+      opciones
+        .map((o) => String(o.id))
+        .filter((otro) => (otro === id ? !elegidos.includes(id) : elegidos.includes(otro)))
+        .join(','),
+    );
+
+  const nombres = opciones.filter((o) => elegidos.includes(String(o.id))).map((o) => o.texto);
+  const resumen =
+    elegidos.length === 0 ? 'Todos' : elegidos.length === 1 ? (nombres[0] ?? '1 usuario') : `${elegidos.length} usuarios`;
+
+  return (
+    <div className="dropdown">
+      <button
+        type="button"
+        id="usuarioIds"
+        className="form-select form-select-sm text-start text-truncate"
+        data-bs-toggle="dropdown"
+        data-bs-auto-close="outside"
+        aria-expanded="false"
+        title={nombres.join(', ')}
+      >
+        {resumen}
+      </button>
+      <div className="dropdown-menu selector-multiple small py-1">
+        <label className="dropdown-item d-flex gap-2">
+          <input type="checkbox" className="form-check-input" checked={elegidos.length === 0} onChange={() => alCambiar('')} />
+          Todos
+        </label>
+        <div className="dropdown-divider my-1" />
+        {opciones.map((o) => (
+          <label key={o.id} className="dropdown-item d-flex gap-2">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              checked={elegidos.includes(String(o.id))}
+              onChange={() => alternar(String(o.id))}
+            />
+            {o.texto}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Reporte de horas: filtros en la URL (fechas, usuarios, proyecto, categoría, tarea/GLPI), resultado con total al pie
  * y exportación a Excel y TXT. Sin fechas en la URL, el backend usa el mes actual.
  */
 export function Reportes() {
   useTitulo('Reportes');
-  const filtros = useFiltrosUrl({ desde: '', hasta: '', usuarioId: '', proyectoId: '', categoriaId: '', tarea: '' });
+  const filtros = useFiltrosUrl({ desde: '', hasta: '', usuarioIds: '', proyectoId: '', categoriaId: '', tarea: '' });
   const { aplicados, borrador, cambiar } = filtros;
 
   const opciones = useDatos(() => api.get<OpcionesReporte>('/reportes/opciones'), []);
@@ -71,16 +128,12 @@ export function Reportes() {
         </div>
         <div className="filtros-abm mb-0">
           <div className="filtro-combo">
-            <label htmlFor="usuarioId" className="form-label small mb-1">Usuario</label>
-            <select
-              id="usuarioId"
-              className="form-select form-select-sm"
-              value={borrador.usuarioId}
-              onChange={(e) => cambiar('usuarioId', e.target.value)}
-            >
-              <option value="">Todos</option>
-              {opciones.datos?.usuarios.map((o) => <option key={o.id} value={o.id}>{o.texto}</option>)}
-            </select>
+            <label htmlFor="usuarioIds" className="form-label small mb-1">Usuarios</label>
+            <SelectorUsuarios
+              opciones={opciones.datos?.usuarios ?? []}
+              valor={borrador.usuarioIds}
+              alCambiar={(valor) => cambiar('usuarioIds', valor)}
+            />
           </div>
           <div className="filtro-combo filtro-combo-ancho">
             <label htmlFor="proyectoId" className="form-label small mb-1">Proyecto</label>

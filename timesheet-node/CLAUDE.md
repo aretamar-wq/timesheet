@@ -212,7 +212,7 @@ Mismo comportamiento que la versión anterior. Pantalla, frontend y backend de c
     - Todo cambio en Familias se guarda con `guardarSinPerderAdministradores`: guarda en una transacción, verifica que quede al menos un administrador activo y, si no, revierte.
 - **Reportes** (`VER_REPORTES`):
   - Frontend: `paginas/Reportes.tsx`. Backend: `rutas/reportes.ts`, `servicios/reporteService.ts` y `exportacion/exportadorReporte.ts`.
-  - Filtros por fechas (por defecto el mes actual, con accesos rápidos a mes actual y mes anterior), usuario, proyecto, categoría y "Tarea / GLPI".
+  - Filtros por fechas (por defecto el mes actual, con accesos rápidos a mes actual y mes anterior), usuarios (uno o varios, desplegable con casillas; viajan como `usuarioIds=3,7`), proyecto, categoría y "Tarea / GLPI".
   - Incluye registros dados de baja.
   - En pantalla muestra hasta 2000 filas. El total y la cantidad son siempre sobre todos los registros.
   - **Excel** (`exceljs`): encabezado, autofiltro, filas inmovilizadas, duración `[h]:mm` y total con `SUM`.

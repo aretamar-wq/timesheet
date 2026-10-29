@@ -32,6 +32,12 @@ export function listaDeEnteros(valor: unknown): number[] {
   return valor.map(enteroOpcional).filter((n): n is number => n !== undefined);
 }
 
+/** Enteros positivos separados por coma ("3,7,12"), sin repetidos; ignora lo que no lo sea. */
+export function enterosSeparadosPorComa(valor: unknown): number[] {
+  const texto = typeof valor === 'string' ? valor : '';
+  return [...new Set(texto.split(',').map(enteroOpcional).filter((n): n is number => n !== undefined))];
+}
+
 /** Body del request como objeto (vacío si no vino JSON). */
 export function cuerpo(req: Request): Record<string, unknown> {
   return typeof req.body === 'object' && req.body !== null ? (req.body as Record<string, unknown>) : {};

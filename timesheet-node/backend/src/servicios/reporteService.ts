@@ -11,7 +11,8 @@ import { comoNumeroGlpi } from './comun.js';
 export interface FiltroReporte {
   desde: string;
   hasta: string;
-  usuarioId?: number;
+  /** Vacío = todos los usuarios. */
+  usuarioIds: number[];
   proyectoId?: number;
   categoriaId?: number;
   /** Si es un número, busca ese GLPI exacto (o el texto en la descripción); si no, busca en la descripción. */
@@ -50,9 +51,9 @@ export async function consultarReporte(filtro: FiltroReporte, maximoFilas?: numb
 
   const condiciones = ['t.tie_fecha BETWEEN ? AND ?'];
   const parametros: unknown[] = [filtro.desde, filtro.hasta];
-  if (filtro.usuarioId !== undefined) {
-    condiciones.push('t.tie_usu = ?');
-    parametros.push(filtro.usuarioId);
+  if (filtro.usuarioIds.length > 0) {
+    condiciones.push(`t.tie_usu IN (${filtro.usuarioIds.map(() => '?').join(', ')})`);
+    parametros.push(...filtro.usuarioIds);
   }
   if (filtro.proyectoId !== undefined) {
     condiciones.push('t.tie_pro = ?');
