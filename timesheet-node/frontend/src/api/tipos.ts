@@ -192,7 +192,7 @@ export interface OpcionesReporte {
 export interface FiltroReporte {
   desde: string;
   hasta: string;
-  usuarioId?: number;
+  usuarioIds: number[];
   proyectoId?: number;
   categoriaId?: number;
   tarea: string;
