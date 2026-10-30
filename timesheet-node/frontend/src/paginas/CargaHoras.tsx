@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 import { useBlocker, useSearchParams } from 'react-router-dom';
 import { api, mensajeDe } from '../api/cliente';
-import type { FilaCarga, OpcionTarea, ProyectoCarga, SemanaCarga } from '../api/tipos';
+import type { DiaSemana, FilaCarga, OpcionTarea, ProyectoCarga, SemanaCarga } from '../api/tipos';
 import { Cargando, ErrorCarga } from '../componentes/Estados';
 import { useDatos } from '../hooks/useDatos';
 import { useTitulo } from '../hooks/useTitulo';
@@ -77,6 +77,11 @@ function crearFila(f: DatosFila): Fila {
 
 function filaSinHoras(f: Fila): boolean {
   return f.celdas.every((c) => !c.valor && !c.guardado && !c.guardando);
+}
+
+/** Sábado, domingo o feriado: la columna se muestra con otro fondo (la carga sigue permitida). */
+function noLaborable(d: DiaSemana): boolean {
+  return d.finDeSemana || d.feriado !== null;
 }
 
 function tieneErrores(filas: Fila[]): boolean {
@@ -371,9 +376,9 @@ export function CargaHoras() {
                 <th className="col-fila">Proyecto / Tarea</th>
                 {dias.map((d) => {
                   const enc = encabezadoDia(d.fecha);
-                  const clases = `text-center col-dia${d.finDeSemana ? ' fin-de-semana' : ''}${d.fecha === datos.hoy ? ' hoy' : ''}`;
+                  const clases = `text-center col-dia${noLaborable(d) ? ' no-laborable' : ''}${d.fecha === datos.hoy ? ' hoy' : ''}`;
                   return (
-                    <th key={d.fecha} className={clases}>
+                    <th key={d.fecha} className={clases} title={d.feriado ? `Feriado: ${d.feriado}` : undefined}>
                       {enc.dia}
                       <br />
                       <span className="small text-muted fw-normal">{enc.fecha}</span>
@@ -416,7 +421,7 @@ export function CargaHoras() {
                       if (c.destello) clases.push('guardado');
                       if (c.error) clases.push('con-error');
                       return (
-                        <td key={dia} className={`p-0${dias[dia].finDeSemana ? ' fin-de-semana' : ''}`}>
+                        <td key={dia} className={`p-0${noLaborable(dias[dia]) ? ' no-laborable' : ''}`}>
                           <input
                             ref={(el) => {
                               const clave = `${f.clave}|${dia}`;
@@ -461,7 +466,7 @@ export function CargaHoras() {
                   const excedido = minutos > MAX_MIN;
                   return (
                     <th key={i}
-                      className={`text-center total-dia${dias[i].finDeSemana ? ' fin-de-semana' : ''}${excedido ? ' excedido' : ''}`}
+                      className={`text-center total-dia${noLaborable(dias[i]) ? ' no-laborable' : ''}${excedido ? ' excedido' : ''}`}
                       title={excedido ? 'El total del día supera las 24 horas' : ''}>
                       {minutosATexto(minutos) || '0:00'}
                     </th>

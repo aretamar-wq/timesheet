@@ -8,6 +8,7 @@ const ABMS: { patente: PatenteCodigo; ruta: string; texto: string }[] = [
   { patente: Patente.ABM_PROYECTOS, ruta: '/proyectos', texto: 'Proyectos' },
   { patente: Patente.ABM_TAREAS, ruta: '/tareas', texto: 'Tareas' },
   { patente: Patente.ABM_CATEGORIAS, ruta: '/categorias', texto: 'Categorías' },
+  { patente: Patente.ABM_FERIADOS, ruta: '/feriados', texto: 'Feriados' },
   { patente: Patente.ABM_USUARIOS, ruta: '/usuarios', texto: 'Usuarios' },
   { patente: Patente.ABM_FAMILIAS, ruta: '/familias', texto: 'Familias' },
   { patente: Patente.ABM_PATENTES, ruta: '/patentes', texto: 'Patentes' },

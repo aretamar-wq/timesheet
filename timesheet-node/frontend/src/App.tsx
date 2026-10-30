@@ -7,6 +7,8 @@ import { CategoriaFormulario } from './paginas/categorias/CategoriaFormulario';
 import { CategoriasListado } from './paginas/categorias/CategoriasListado';
 import { FamiliaFormulario } from './paginas/familias/FamiliaFormulario';
 import { FamiliasListado } from './paginas/familias/FamiliasListado';
+import { FeriadoFormulario } from './paginas/feriados/FeriadoFormulario';
+import { FeriadosListado } from './paginas/feriados/FeriadosListado';
 import { Login } from './paginas/Login';
 import { PatenteFormulario } from './paginas/patentes/PatenteFormulario';
 import { PatentesListado } from './paginas/patentes/PatentesListado';
@@ -55,6 +57,10 @@ export function App() {
         <Route path="categorias" element={con(Patente.ABM_CATEGORIAS, <CategoriasListado />)} />
         <Route path="categorias/nueva" element={con(Patente.ABM_CATEGORIAS, <CategoriaFormulario />)} />
         <Route path="categorias/:id" element={con(Patente.ABM_CATEGORIAS, <CategoriaFormulario />)} />
+
+        <Route path="feriados" element={con(Patente.ABM_FERIADOS, <FeriadosListado />)} />
+        <Route path="feriados/nuevo" element={con(Patente.ABM_FERIADOS, <FeriadoFormulario />)} />
+        <Route path="feriados/:id" element={con(Patente.ABM_FERIADOS, <FeriadoFormulario />)} />
 
         <Route path="usuarios" element={con(Patente.ABM_USUARIOS, <UsuariosListado />)} />
         <Route path="usuarios/nuevo" element={con(Patente.ABM_USUARIOS, <UsuarioFormulario />)} />

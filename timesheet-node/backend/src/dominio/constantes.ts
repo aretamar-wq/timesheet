@@ -1,4 +1,4 @@
-/** Nombres de las patentes (pat_nombre). Deben coincidir con los datos semilla de database/02_seed.sql. */
+/** Nombres de las patentes (pat_nombre). Deben coincidir con los datos semilla de database/02_seed.sql (y 04_feriados.sql). */
 export const Patente = {
   CARGA_HORAS: 'CARGA_HORAS',
   ABM_PROYECTOS: 'ABM_PROYECTOS',
@@ -7,6 +7,7 @@ export const Patente = {
   ABM_USUARIOS: 'ABM_USUARIOS',
   ABM_FAMILIAS: 'ABM_FAMILIAS',
   ABM_PATENTES: 'ABM_PATENTES',
+  ABM_FERIADOS: 'ABM_FERIADOS',
   VER_REPORTES: 'VER_REPORTES',
 } as const;
 export type PatenteCodigo = (typeof Patente)[keyof typeof Patente];

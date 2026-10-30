@@ -4,7 +4,7 @@
 
 Sistema web interno para que el equipo del área de Aplicaciones cargue sus horas trabajadas, reemplazando la aplicación externa (gratuita) que se usa actualmente.
 
-- **Alcance**: carga de horas semanal, administración de tablas maestras (proyectos, tareas, categorías, usuarios, seguridad) y un módulo de reportes.
+- **Alcance**: carga de horas semanal, administración de tablas maestras (proyectos, tareas, categorías, feriados, usuarios, seguridad) y un módulo de reportes.
 - **Sin aprobaciones**: a diferencia de la app actual, no hay flujo de aprobación de horas por parte de un supervisor.
 - **Usuarios**: miembros del equipo de Aplicaciones. El acceso a cada funcionalidad depende de la Familia de seguridad de cada usuario.
 - **Autenticación**: contra Active Directory del dominio de la empresa, sin manejo de contraseñas propio.
@@ -56,6 +56,13 @@ Restricción: unicidad de `(tie_usu, tie_pro, tie_tar, tie_fecha)` para evitar d
 
 Regla de integridad: si `tie_tar` está cargado, la Tarea debe pertenecer al mismo Proyecto que `tie_pro`. Se valida en backend (`tiempoService.ts`) y además en la base con una FK compuesta `(tie_tar, tie_pro) → Tareas(tar_id, tar_pro)`.
 
+**Feriados** (`database/04_feriados.sql`)
+
+- `fer_id` (PK)
+- `fer_fecha` — única, contando también los feriados dados de baja (`UQ_Feriados_fecha`)
+- `fer_descripcion`
+- `fer_activo` (bit) — baja lógica
+
 ## Modelo de datos - Seguridad
 
 Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a una sola Familia; cada Familia agrupa varias Patentes (permisos); un Usuario hereda todas las Patentes de su Familia.
@@ -87,7 +94,7 @@ Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a u
 - `Empleado`
 - `Administrador`
 
-**Patentes** (8 registros iniciales, desglosadas por función — permite crear familias intermedias a futuro sin cambiar estructura)
+**Patentes** (9 registros iniciales, desglosadas por función — permite crear familias intermedias a futuro sin cambiar estructura; `ABM_FERIADOS` se agrega en `04_feriados.sql`)
 
 - `CARGA_HORAS`
 - `ABM_PROYECTOS`
@@ -97,11 +104,12 @@ Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a u
 - `ABM_FAMILIAS`
 - `ABM_PATENTES`
 - `VER_REPORTES`
+- `ABM_FERIADOS`
 
 **Asignación Familia\_Patente**
 
 - `Empleado` → `CARGA_HORAS`
-- `Administrador` → las 8 patentes
+- `Administrador` → las 9 patentes
 
 ## Reglas de negocio
 
@@ -113,6 +121,7 @@ Modelo de 3 niveles: Usuario → Familia → Patente. Cada Usuario pertenece a u
 6. **Unicidad de carga**: no puede haber dos registros de Tiempo con el mismo `(tie_usu, tie_pro, tie_tar, tie_fecha)` — cada celda de la grilla es un único valor.
 7. **Tarea según el proyecto**: si el proyecto se carga por ticket GLPI (`pro_usa_glpi = 1`), las horas se cargan siempre contra una tarea (`tie_tar` obligatorio); si no, el proyecto no admite tareas (`tie_tar` NULL). Se valida en backend (`tiempoService.ts`, al guardar; borrar horas existentes no lo exige) y en la UI.
 8. **Cambio de "Se carga por ticket GLPI"**: no se puede desmarcar en un proyecto con tareas activas (hay que darlas de baja antes). Las horas cargadas con la configuración anterior se conservan, pero en la grilla quedan en solo lectura.
+9. **Feriados**: en la carga de horas, los días con un feriado activo se muestran como los sábados y domingos (otro fondo, y la descripción al pasar el mouse por el encabezado). No bloquean la carga.
 
 ## Stack tecnológico y autenticación
 
@@ -139,7 +148,8 @@ AD valida identidad; la aplicación es la única fuente de verdad sobre permisos
 
 ```
 timesheet-node/
-├─ database/    01_schema.sql, 02_seed.sql (idempotente), 03_usuario_app.sql (usuario MariaDB de la app)
+├─ database/    01_schema.sql, 02_seed.sql (idempotente), 03_usuario_app.sql (usuario MariaDB de la app),
+│               04_feriados.sql (tabla Feriados y patente ABM_FERIADOS)
 ├─ backend/     src/config.ts (.env), db.ts, dominio/ (constantes, duracion, fechas), seguridad/ (AD, sesión,
 │               middleware), servicios/ (reglas de negocio), rutas/ (API), exportacion/ (Excel/TXT)
 ├─ frontend/    src/api/ (cliente fetch + tipos), sesion/, componentes/ (Layout, Abm, Mensajes, Estados),
@@ -195,6 +205,7 @@ Mismo comportamiento que la versión anterior. Pantalla, frontend y backend de c
   - Grilla lunes a domingo con navegación por `?fecha=`.
   - Máscara de horas (`130` → `1:30`), solo `:00`/`:30`, máximo 24:00.
   - Autoguardado por celda con una cola de a uno. Celda vacía = borrar la carga.
+  - Sábados, domingos y feriados activos con otro fondo (regla 9).
   - Totales por fila y por día, con resaltado si un día supera 24 h.
   - Modal "Agregar fila" con buscador de tareas y alta rápida de tarea (cualquier usuario con `CARGA_HORAS`). Si el GLPI ya existe en el proyecto, se reutiliza la tarea.
   - Copiar semana anterior.
@@ -202,6 +213,7 @@ Mismo comportamiento que la versión anterior. Pantalla, frontend y backend de c
 - **ABM** (`paginas/<tabla>/`, `rutas/abm.ts`, `servicios/<tabla>Service.ts`):
   - **Proyectos**: es el modelo del patrón.
   - **Categorías**.
+  - **Feriados** (`ABM_FERIADOS`): fecha única y descripción. Listado filtrado por año (por defecto el actual).
   - **Tareas**: GLPI único por proyecto, también contra tareas dadas de baja. Una tarea con horas no puede cambiar de proyecto.
   - **Usuarios**: validación en AD con "Verificar en AD" (`/api/usuarios/buscar-ad`).
   - **Familias**.

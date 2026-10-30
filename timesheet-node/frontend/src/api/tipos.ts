@@ -8,6 +8,7 @@ export const Patente = {
   ABM_USUARIOS: 'ABM_USUARIOS',
   ABM_FAMILIAS: 'ABM_FAMILIAS',
   ABM_PATENTES: 'ABM_PATENTES',
+  ABM_FERIADOS: 'ABM_FERIADOS',
   VER_REPORTES: 'VER_REPORTES',
 } as const;
 export type PatenteCodigo = (typeof Patente)[keyof typeof Patente];
@@ -45,6 +46,8 @@ export interface FilaCarga {
 export interface DiaSemana {
   fecha: string;
   finDeSemana: boolean;
+  /** Descripción del feriado (null si el día no es feriado). */
+  feriado: string | null;
 }
 
 export interface ProyectoCarga {
@@ -83,6 +86,13 @@ export interface Categoria {
 
 export interface CategoriaListado extends Categoria {
   proyectosActivos: number;
+}
+
+export interface Feriado {
+  id: number;
+  fecha: string;
+  descripcion: string;
+  activo: boolean;
 }
 
 export interface Proyecto {

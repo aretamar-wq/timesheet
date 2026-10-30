@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { Patente } from '../dominio/constantes.js';
 import { parsearDuracion } from '../dominio/duracion.js';
-import { hoy, parsearFecha, sumarDias } from '../dominio/fechas.js';
+import { hoy, lunesDe, parsearFecha, sumarDias } from '../dominio/fechas.js';
 import { ReglaNegocioError } from '../errores.js';
 import { requierePatente, sesionDe } from '../seguridad/middleware.js';
+import * as feriados from '../servicios/feriadoService.js';
 import * as proyectos from '../servicios/proyectoService.js';
 import * as tareas from '../servicios/tareaService.js';
 import * as tiempos from '../servicios/tiempoService.js';
@@ -19,14 +20,21 @@ rutasCargaHoras.use(requierePatente(Patente.CARGA_HORAS));
 // GET /api/carga/semana?fecha=2026-09-21
 rutasCargaHoras.get('/semana', async (req, res) => {
   const fecha = parsearFecha(req.query.fecha) ?? hoy();
-  const [semana, activos] = await Promise.all([
+  const lunes = lunesDe(fecha);
+  const [semana, activos, feriadosSemana] = await Promise.all([
     tiempos.obtenerSemana(sesionDe(req).usuarioId, fecha),
     proyectos.activos(),
+    feriados.activosEntre(lunes, sumarDias(lunes, 6)),
   ]);
+  // feriado: descripción del feriado activo de ese día (null si no es feriado).
+  const dias = Array.from({ length: 7 }, (_, i) => {
+    const dia = sumarDias(lunes, i);
+    return { fecha: dia, finDeSemana: i >= 5, feriado: feriadosSemana.find((f) => f.fecha === dia)?.descripcion ?? null };
+  });
   res.json({
     lunes: semana.lunes,
     hoy: hoy(),
-    dias: Array.from({ length: 7 }, (_, i) => ({ fecha: sumarDias(semana.lunes, i), finDeSemana: i >= 5 })),
+    dias,
     filas: semana.filas,
     proyectos: activos.map((p) => ({ id: p.id, nombre: p.nombre, categoria: p.categoria, usaGlpi: p.usaGlpi })),
   });

@@ -4,6 +4,7 @@ import { NoEncontradoError } from '../errores.js';
 import { requierePatente, sesionDe } from '../seguridad/middleware.js';
 import * as categorias from '../servicios/categoriaService.js';
 import * as familias from '../servicios/familiaService.js';
+import * as feriados from '../servicios/feriadoService.js';
 import * as patentes from '../servicios/patenteService.js';
 import * as proyectos from '../servicios/proyectoService.js';
 import * as tareas from '../servicios/tareaService.js';
@@ -192,5 +193,32 @@ rutasPatentes.get('/:id', async (req, res) => {
 });
 rutasPatentes.put('/:id', async (req, res) => {
   await patentes.modificarDescripcion(idDeRuta(req), cuerpo(req).descripcion);
+  res.status(204).end();
+});
+
+/* ---------- Feriados ---------- */
+export const rutasFeriados = Router();
+rutasFeriados.use(requierePatente(Patente.ABM_FERIADOS));
+
+rutasFeriados.get('/', async (req, res) => {
+  res.json(await feriados.listar(
+    enteroOpcional(req.query.anio),
+    textoOpcional(req.query.texto),
+    parsearEstado(req.query.estado),
+  ));
+});
+rutasFeriados.get('/:id', async (req, res) => {
+  res.json(encontrado(await feriados.obtener(idDeRuta(req))));
+});
+rutasFeriados.post('/', async (req, res) => {
+  const body = cuerpo(req);
+  res.status(201).json({ id: await feriados.guardar(0, body.fecha, body.descripcion) });
+});
+rutasFeriados.put('/:id', async (req, res) => {
+  const body = cuerpo(req);
+  res.json({ id: await feriados.guardar(idDeRuta(req), body.fecha, body.descripcion) });
+});
+rutasFeriados.put('/:id/estado', async (req, res) => {
+  await feriados.cambiarEstado(idDeRuta(req), booleano(cuerpo(req).activo));
   res.status(204).end();
 });
